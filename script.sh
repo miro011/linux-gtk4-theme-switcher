@@ -1,18 +1,18 @@
 #!/bin/bash
 
-[ ! -d "$HOME/.themes" ] && echo "No themes in $HOME/.themes" && exit
-sudo [ ! -d "/root/.themes" ] && sudo mkdir -p "/root/.themes" # create root themes folder if not already there
+[ ! -d "$HOME/.local/share/themes" ] && echo "No themes in $HOME/.local/share/themes" && read hold && exit
+sudo [ ! -d "/root/.local/share/themes" ] && sudo mkdir -p "/root/.local/share/themes" # create root themes folder if not already there
 
 # GET VALID THEMES
 
 declare -a validThemeNamesArr=()
 
-for indexThemeDir in $(find "$HOME/.themes" -type f -name 'index.theme'); do
+for indexThemeDir in $(find "$HOME/.local/share/themes" -type f -name 'index.theme'); do
     themeDir=$(dirname "$indexThemeDir")
     [ ! -d "$themeDir/gtk-4.0" ] && continue # no gtk-4.0 = theme won't be compatible
 
     themeName=$(basename $themeDir)
-    sudo [ ! -d "/root/.themes/$themeName" ] && sudo cp -r "$themeDir" "/root/.themes/$themeName" # copy theme to root if it's not there
+    sudo [ ! -d "/root/.local/share/themes/$themeName" ] && sudo cp -r "$themeDir" "/root/.local/share/themes/$themeName" # copy theme to root if it's not there
     validThemeNamesArr+=("$themeName")
 done
 
@@ -49,6 +49,7 @@ if [[ "$uin" == "0" ]]; then
     sudo flatpak override --reset
     clear
     echo "RESTART FOR EVERYTHING TO BE APPLIED"
+    read hold
 else
     themeName=${validThemeNamesArr[$uin]}
 
@@ -62,9 +63,10 @@ else
     echo "export GTK_THEME=$themeName" | sudo tee --append "/root/.bash_profile"
 
     # flatpak
-    sudo flatpak override --filesystem=$HOME/.themes
+    sudo flatpak override --filesystem=xdg-data/themes # only way to give access to /.local/share/themes
     sudo flatpak override --env=GTK_THEME="$themeName"
 
     clear
     echo "LOGOUT FOR EVERYTHING TO BE APPLIED"
+    read hold
 fi
