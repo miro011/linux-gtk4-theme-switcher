@@ -46,7 +46,7 @@ sudo grep -v "export GTK_THEME=" "/root/.bash_profile" > tmpfile && sudo mv tmpf
 if [[ "$uin" == "0" ]]; then
     gsettings reset org.gnome.desktop.interface gtk-theme
     sudo gsettings reset org.gnome.desktop.interface gtk-theme
-    sudo flatpak override --reset
+    grep -v "GTK_THEME=" "$HOME/.local/share/flatpak/overrides/global" > tmpfile && mv tmpfile "$HOME/.local/share/flatpak/overrides/global"
     clear
     echo "RESTART FOR EVERYTHING TO BE APPLIED"
     read hold
@@ -57,14 +57,13 @@ else
     gsettings set org.gnome.desktop.interface gtk-theme "$themeName"
     sudo gsettings set org.gnome.desktop.interface gtk-theme "$themeName"
 
-
     # add new export
     echo "export GTK_THEME=$themeName" >> "$HOME/.bash_profile"
     echo "export GTK_THEME=$themeName" | sudo tee --append "/root/.bash_profile"
 
     # flatpak
-    sudo flatpak override --filesystem=xdg-data/themes # only way to give access to /.local/share/themes
-    sudo flatpak override --env=GTK_THEME="$themeName"
+    flatpak override --user --filesystem=xdg-data/themes # only way to give access to /.local/share/themes
+    flatpak override --user --env=GTK_THEME="$themeName"
 
     clear
     echo "LOGOUT FOR EVERYTHING TO BE APPLIED"
